@@ -6,7 +6,7 @@ use Guzzle\Http\ClientInterface;
 
 interface MailjetClientInterface
 {
-    const API_VERSION  = '0.1';
+    const API_VERSION  = 'v3';
     const API_BASE_URL = 'api.mailjet.com';
 
     const FORMAT_CSV       = 'csv';
@@ -42,6 +42,7 @@ interface MailjetClientInterface
 
     /**
      * @param string $connectionMode
+     *
      * @return \Mailjet\Api\MailjetClientInterface
      */
     public function setConnectionMode($connectionMode);
@@ -53,6 +54,7 @@ interface MailjetClientInterface
 
     /**
      * @param string $outputFormat
+     *
      * @return \Mailjet\Api\MailjetClientInterface
      */
     public function setOutputFormat($outputFormat);

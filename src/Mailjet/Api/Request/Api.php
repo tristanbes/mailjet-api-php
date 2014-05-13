@@ -7,7 +7,7 @@ use Mailjet\Api\RequestApi;
 
 /**
  * Higher-level OOP wrapper over Mailjet Client for Api related requests
- * 
+ *
  * @link http://www.mailjet.com/docs/api/api
  *
  * Based on https://github.com/dguyon/Mailjet
@@ -22,14 +22,43 @@ class Api
     }
 
     /**
-     * @link http://www.mailjet.com/docs/api/api/keyadd
+     * @link http://dev.mailjet.com/email-api/v3/apikey/
      */
-    public function addKey($name, $status = '')
+    public function createKey($name, $isActive = null, $isMaster = null, $customStatus = null, $secretKey = null, $trackHost = null)
     {
-        return $this->client->post(RequestApi::API_KEY_ADD, array(
-            'name'          => $name,
-            'custom_status' => $status
-        ));
+        $options = array(
+            'Name' => $name,
+        );
+
+        if (null !== $isActive) {
+            $options['IsActive'] = $isActive;
+        }
+
+        if (null !== $isMaster) {
+            $options['IsMaster'] = $isMaster;
+        }
+
+        if (null !== $customStatus) {
+            $options['CustomStatus'] = $customStatus;
+        }
+
+        if (null !== $secretKey) {
+            $options['SecretKey'] = $secretKey;
+        }
+
+        if (null !== $trackHost) {
+            $options['TrackHost'] = $trackHost;
+        }
+
+        return $this->client->post(RequestApi::API_KEY, $options);
+    }
+
+    /**
+     * @link http://dev.mailjet.com/email-api/v3/apikey/
+     */
+    public function deleteKey($id)
+    {
+        return $this->client->delete(RequestApi::API_KEY, $id);
     }
 
     /**
@@ -70,39 +99,44 @@ class Api
     public function getKeys($key = '', $status = '', $name = '', $type = null, $isActive = null)
     {
         $options = array(
-            'api_key'       => $key,
-            'custom_status' => $status,
-            'name'          => $name,
+            'APIKey'       => $key,
+            'CustomStatus' => $status,
+            'Name'         => $name,
         );
 
         if (null !== $type) {
-            $options['type'] = $type;
+            $options['KeyType'] = $type;
         }
 
         if (null !== $isActive) {
-            $options['active'] = $isActive;
+            $options['IsActive'] = $isActive;
         }
 
         return $this->client->get(RequestApi::API_KEY_LIST, $options);
     }
 
+
     /**
-     * @link http://www.mailjet.com/docs/api/api/keysecret
+     * @link http://dev.mailjet.com/email-api/v3/metasender/
      */
-    public function getSecretForKey($key)
+    public function getDomains()
     {
-        return $this->client->get(RequestApi::API_KEY_SECRET, array(
-            'apiKey' => $key
-        ));
+        return $this->client->get(RequestApi::META_SENDER);
     }
 
     /**
-     * @link http://www.mailjet.com/docs/api/api/keysecretchange
+     * @link http://dev.mailjet.com/email-api/v3/metasender/
      */
-    public function resetSecretForKey($key)
+    public function validateDomain($email, $description = null)
     {
-        return $this->client->post(RequestApi::API_KEY_SECRET_CHANGE, array(
-            'apiKey' => $key
-        ));
+        $options = array(
+            'Email' => $email
+        );
+
+        if (null !== $description) {
+            $options['Description'] = $description;
+        }
+
+        return $this->client->post(RequestApi::META_SENDER, $options);
     }
 }

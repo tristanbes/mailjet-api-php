@@ -43,10 +43,6 @@ class Client implements MailjetClientInterface
      */
     public function get($apiQuery, $options = array())
     {
-        if (!RequestApi::isGet($apiQuery)) {
-            throw new \InvalidArgumentException('Unsupported API query for GET method: ' . $apiQuery);
-        }
-
         $request = $this->getApi()->get($apiQuery);
 
         $this->prepareRequest($request, $options);
@@ -63,18 +59,30 @@ class Client implements MailjetClientInterface
      */
     public function post($apiQuery, $options = array())
     {
-        if (!RequestApi::isPost($apiQuery)) {
-            throw new \InvalidArgumentException('Unsupported API query for POST method: ' . $apiQuery);
-        }
-
         $request = $this->getApi()->post($apiQuery);
 
-        $this->prepareRequest($request, $options);
+        $this->preparePostRequest($request, $options);
 
         $response = $request->send();
 
         return $this->processResponse($response);
     }
+
+    /**
+     * Method for issuing low level API DELETE requests
+     *
+     * @see Client::delete()
+     */
+    public function delete($apiQuery, $id)
+    {
+        $request  = $this->getApi()->delete($apiQuery.'/'.$id);
+        $this->preparePostRequest($request);
+
+        $response = $request->send();
+
+        return $this->processResponse($response);
+    }
+
 
     public function setConnectionMode($connectionMode)
     {
@@ -143,7 +151,7 @@ class Client implements MailjetClientInterface
     public function getApi()
     {
         if (!$this->apiClient) {
-            $this->setApi(new HttpClient(sprintf('%s://%s/%s', $this->connectionMode, self::API_BASE_URL, self::API_VERSION)));
+            $this->setApi(new HttpClient(sprintf('%s://%s/%s/REST', $this->connectionMode, self::API_BASE_URL, self::API_VERSION)));
         }
 
         return $this->apiClient;
@@ -154,10 +162,17 @@ class Client implements MailjetClientInterface
         $request->setAuth($this->apiKey, $this->secretKey);
 
         $query = $request->getQuery();
-        $query->add('output', $this->getRealOutputFormat());
         foreach ($options as $option => $value) {
             $query->add($option, $value);
         }
+    }
+
+    private function preparePostRequest(RequestInterface $request, $options = array())
+    {
+        $request->setAuth($this->apiKey, $this->secretKey);
+        $request->addHeader('Content-Type', 'application/json');
+
+        $request->setBody(json_encode($options));
     }
 
     private function processResponse(Response $response)
@@ -166,10 +181,6 @@ class Client implements MailjetClientInterface
             throw new ApiServerException($response->getMessage(), $response->getStatusCode());
         }
 
-        if (self::FORMAT_ARRAY === $this->outputFormat) {
-            return $response->json();
-        }
-
-        return $response->getBody(true);
+        return $response->json();
     }
 }
