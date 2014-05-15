@@ -139,4 +139,14 @@ class Api
 
         return $this->client->post(RequestApi::META_SENDER, $options);
     }
+
+    /**
+     * @link http://dev.mailjet.com/email-api/v3/metasender/
+     */
+    public function getDomain($id)
+    {
+        $extraRoute = array($id);
+
+        return $this->client->get(RequestApi::META_SENDER, $options, $extraRoute)
+    }
 }

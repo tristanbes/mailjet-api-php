@@ -36,14 +36,21 @@ class Client implements MailjetClientInterface
      *
      * @param $apiQuery For list of available queries @see \Mailjet\Api\RequestApi
      * @param array $options
+     * @param array $extraRoutes
      *
      * @return string|array
      *
      * @throws \InvalidArgumentException
      */
-    public function get($apiQuery, $options = array())
+    public function get($apiQuery, $options = array(), $extraRoutes = array())
     {
-        $request = $this->getApi()->get($apiQuery);
+        if (count($extraRoutes)) {
+            $extra = implode('/', $extraRoutes);
+        } else {
+            $extra = '';
+        }
+
+        $request = $this->getApi()->get($apiQuery.$extra);
 
         $this->prepareRequest($request, $options);
 
